@@ -27,4 +27,4 @@ Makefile
 Thumbs.db
 
 # API KEYS
-.key
+*.key
