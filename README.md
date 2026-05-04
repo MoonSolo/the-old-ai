@@ -1,178 +1,87 @@
-# SBAITSO TTS Synthesizer
+# SCP-079 AI Fan Project
 
-SBAITSO TTS is a reverse-engineered, formant-based speech synthesizer inspired by the original Dr. SBAITSO text-to-speech program. It is implemented in portable C and is intended for educational and nostalgic use.
+This repository is a fan-made Windows port of an SCP-079–inspired conversational AI interface. It combines a Groq-based GPT-style chat workflow with SBAITSO text-to-speech playback via DOSBox-X.
 
-## Project Description
+## Overview
 
-This repository contains an independent implementation of a vintage-style synthetic speech engine. It generates 16-bit mono WAV audio using a mathematical model of the vocal tract and ARPABET phonemes rather than modern machine learning techniques.
+- The core behavior is driven by `sbaitso_ai.py`, which uses a Groq chat completion model to simulate SCP-079.
+- Speech output is produced by `sbaitso_tts.py`, which launches DOSBox-X and drives the original `READ.EXE` from the bundled `ressources/SBAITSO` directory.
+- The launcher is `launch_sbaitso.bat`, which starts `launch_sbaitso.ps1` and handles dependency checks.
 
-The project is not affiliated with, endorsed by, or owned by the creators of the original Dr. SBAITSO program.
+## Important Disclaimer
 
-## Disclaimer
-
-- The original Dr. SBAITSO program and associated intellectual property remain the property of their respective rights holders.
-- This project does not claim ownership of the original software, brand, or audio assets.
-- The included TTS implementation is a reverse-engineered recreation intended for research, preservation, and experimentation.
-
-## Features
-
-- Formal formant synthesis engine with controlled formant frequencies and bandwidths
-- Support for 44 ARPABET phonemes covering English speech sounds
-- Vintage robotic voice character with minimal co-articulation and steady pitch
-- Pure C implementation with no external runtime dependencies
-- 22050 Hz 16-bit PCM WAV output by default
-- Cross-platform build support for Windows, Linux, and macOS
+- This project is a fan-made recreation and is not affiliated with the SCP Foundation.
+- The SCP-079 character, related lore, and trademarks belong to the SCP community.
+- The SBAITSO TTS assets are not owned by this project and remain the property of their original rights holders.
 
 ## Requirements
 
-- Windows: MinGW, MSVC, or compatible C compiler
-- Linux/macOS: GCC or Clang
+- Windows 10 / 11
+- Python installed and available on `PATH`
+- DOSBox-X executable available in `ressources/dosbox-x/` or on `PATH`
+- Groq API key
+- `ressources/SBAITSO/` containing `READ.EXE`, `SBTALKER.EXE`, `SBTALK.BAT`, and related files
 
-## Building
+## Running the Project
 
-### Windows Batch
+### Recommended: Double-click `launch_sbaitso.bat`
 
-```cmd
-build.bat
+This is the intended startup method. The batch file launches the PowerShell launcher with execution policy bypass and performs dependency checks.
+
+### Alternative: Run the PowerShell launcher directly
+
+```powershell
+powershell -ExecutionPolicy Bypass -File launch_sbaitso.ps1
 ```
 
-### Makefile (Windows, Linux, macOS)
+## API Key Setup
 
-```bash
-make
-```
+The launcher can prompt for your Groq API key and optionally save it to your Windows user environment variables.
 
-### CMake (Cross-platform)
+You may also provide the key via:
 
-```bash
-mkdir build
-cd build
-cmake ..
-cmake --build .
-```
+- `GROQ_API_KEY` environment variable
+- `api.key` file in the repository root
+
+## How It Works
+
+1. `launch_sbaitso.bat` / `launch_sbaitso.ps1` validates the environment.
+2. `sbaitso_ai.py` loads the SCP-079 system prompt and user conversation history.
+3. Chat responses are generated through Groq’s chat completions endpoint.
+4. `sbaitso_tts.py` converts the response text into speech by launching DOSBox-X with a temporary config that runs `READ.EXE`.
+
+## Project Structure
+
+- `sbaitso_ai.py` — main application logic and Groq chat integration
+- `sbaitso_tts.py` — DOSBox-X based TTS wrapper for SBAITSO speech
+- `launch_sbaitso.bat` — easy double-click launcher for Windows
+- `launch_sbaitso.ps1` — dependency checker and startup helper
+- `ressources/dosbox-x/` — bundled DOSBox-X binaries
+- `ressources/SBAITSO/` — original SBAITSO runtime files
+- `api.key` — optional file for storing the Groq API key
 
 ## Usage
 
-```bash
-./tts "Your text here"
-./tts "Hello world" output.wav
-```
+Once launched, type messages into the console. Common session commands:
 
-### Examples
+- `quit`
+- `exit`
+- `bye`
 
-```bash
-./tts "Hello, how are you today?"
-./tts "I am SBAITSO" sbaitso_intro.wav
-./tts "Good day. I am SBAITSO. How can I help you?" greeting.wav
-```
+The assistant will speak responses using the bundled SBAITSO voice.
 
-## Design Overview
+## Notes
 
-### Synthesis Model
+- The voice synthesis uses the original DOS-based `READ.EXE` program via DOSBox-X.
+- The repository is intended to be a Windows-compatible fan port, not a reimplementation of the original IBM PC software.
+- The `.bat` launcher is the simplest way to start the application.
 
-The engine uses a formant synthesis approach that models speech production as a sequence of phonemes. Each phoneme is defined by:
+## Acknowledgements
 
-- F1, F2, F3 target frequencies
-- Bandwidth and resonance properties
-- Voicing state (voiced or unvoiced)
-- Relative amplitude
-- Default duration
+- SCP Foundation community content and SCP-079 character inspiration
+- Dr. SBAITSO for the classic vintage TTS style
+- Groq for the chat completion model endpoint
 
-### Signal Generation
+## License
 
-- Voiced phonemes are synthesized from sine waves at the formant frequencies plus a steady fundamental frequency (F0)
-- Unvoiced phonemes use filtered noise shaped by the same formant structure
-- Envelope shaping is applied with brief attack and release phases to create a mechanical, retro vocal quality
-
-### Output
-
-- 16-bit signed PCM
-- 22050 Hz sample rate
-- Mono channel
-
-## Architecture
-
-```
-src/
-├── main.c              # CLI interface and entry point
-├── phonemes.c          # Phoneme definitions and ARPABET parsing
-├── synthesizer.c       # Formant synthesis engine and waveform generation
-├── wav.c               # WAV file output
-└── text_to_phoneme.c   # Text normalization and phoneme conversion
-
-include/
-├── phonemes.h
-├── synthesizer.h
-├── wav.h
-└── text_to_phoneme.h
-```
-
-## Phoneme Set
-
-- Vowels: AA, AE, AH, AO, AW, AY, EH, ER, EY, IH, IY, OW, OY, UH, UW
-- Semivowels: L, R, W, Y
-- Fricatives: F, S, SH, TH, DH, V, Z, ZH
-- Affricates: CH, JH
-- Stops: K, P, T, B, D, G
-- Nasals: M, N, NG
-- Special: SIL (silence/pause)
-
-## Dictionary
-
-The text-to-phoneme converter includes a limited dictionary of common English words. Words that are not present in the dictionary are handled conservatively to preserve intelligibility.
-
-## Customization
-
-### Adjust Sample Rate
-
-Modify `SAMPLE_RATE` in `include/synthesizer.h`:
-
-```c
-#define SAMPLE_RATE 11050  /* Use a lower sample rate for a more retro sound */
-```
-
-### Modify Phoneme Parameters
-
-Change formant frequencies and bandwidths in `src/phonemes.c` to alter the voice timbre.
-
-### Extend the Dictionary
-
-Add entries in `src/text_to_phoneme.c`:
-
-```c
-{"word", "W ER D"},
-```
-
-### Change Voice Behavior
-
-Adjust synthesis parameters in `src/synthesizer.c`, such as:
-
-- `f0` for base pitch
-- `formant_amplitude` for overall loudness
-- envelope attack and release values
-
-## Known Limitations
-
-- Monotonic pitch without natural prosody
-- Limited vocabulary and dictionary coverage
-- Simple co-articulation, producing a deliberately mechanical sound
-- Formant-based synthesis is not equivalent to modern neural TTS systems
-
-## Original SBAITSO Capture
-
-This project also documents a pathway for running the original SBAITSO program inside DOSBox‑X and capturing authentic WAV output. This workflow is provided for comparison and preservation, not as a claim of ownership.
-
-## References
-
-- ARPABET phoneme set
-- Klatt, D. H. (1980). "Software for a cascade/parallel formant synthesizer"
-- Dr. SBAITSO, Sensible Software (1990s)
-
-## License and Ownership
-
-This repository is a reverse-engineered recreation for education and archival purposes. The original Dr. SBAITSO application and trademark are not owned by this project.
-
-## Credits
-
-Inspired by the original Dr. SBAITSO speech synthesizer and the early era of vintage text-to-speech technology.
-
+This repository is provided as a fan project and a technical demonstration. It does not claim ownership of SCP-079, the SCP Foundation IP, or the original SBAITSO software.
