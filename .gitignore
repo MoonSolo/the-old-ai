@@ -1,0 +1,30 @@
+# Build artifacts
+*.o
+*.a
+*.exe
+*.out
+tts
+build/
+*.wav
+
+# IDE/Editor
+.vscode/
+.vs/
+*.code-workspace
+.idea/
+*.swp
+*.swo
+*~
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# OS
+.DS_Store
+Thumbs.db
+
+# API KEYS
+.key
